@@ -1,4 +1,4 @@
-package com.app.event_driven.inventory_service.models;
+package com.app.event_driven.model;
 
 
 import lombok.AllArgsConstructor;

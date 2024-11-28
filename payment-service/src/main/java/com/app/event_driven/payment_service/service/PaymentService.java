@@ -24,7 +24,6 @@ public class PaymentService {
         Payment payment = new Payment();
         payment.setTransactionId(transactionId);
         payment.setPrice(order.getPrice());
-        payment.setCreated(LocalDate.now());
         payment.setModified(LocalDate.now());
         payment.setOrderId(order.getOrderId());
         paymentRepository.save(payment);

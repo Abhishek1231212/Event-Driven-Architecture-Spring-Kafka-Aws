@@ -1,8 +1,8 @@
-package com.app.event_driven.inventory_service.services;
+package com.app.event_driven.service;
 
 
-import com.app.event_driven.inventory_service.models.Inventory;
-import com.app.event_driven.inventory_service.repository.InventoryRepository;
+import com.app.event_driven.model.Inventory;
+import com.app.event_driven.repository.InventoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,8 +1,8 @@
-package com.app.event_driven.inventory_service.controller;
+package com.app.event_driven.controller;
 
 
-import com.app.event_driven.inventory_service.models.Inventory;
-import com.app.event_driven.inventory_service.services.InventoryService;
+import com.app.event_driven.model.Inventory;
+import com.app.event_driven.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

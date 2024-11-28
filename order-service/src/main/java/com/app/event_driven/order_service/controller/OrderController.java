@@ -21,7 +21,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<Order> createOrder(@RequestBody Order order){
         Order createdOrder = orderService.createOrder(order);
-        return ResponseEntity.ok(createdOrder);
+        return (createdOrder!=null)?ResponseEntity.ok(createdOrder):ResponseEntity.badRequest().body(createdOrder);
     }
 
     @GetMapping
@@ -34,20 +34,15 @@ public class OrderController {
         return ResponseEntity.ok(orderService.updateOrder(order));
     }
 
-    @GetMapping("/orderId/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long id){
-        Optional<Order> order = orderService.getOrderById(id);
-        if (order.isPresent()) {
-            return ResponseEntity.ok(orderService.getOrderById(id).get());
-        }
-        else{
-            return ResponseEntity.badRequest().body(null);
-        }
+    @GetMapping("/{orderId}")
+    public ResponseEntity<Order> getOrderById(@PathVariable("orderId") String orderId){
+        Optional<Order> order = orderService.getOrderById(orderId);
+        return order.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().body(null));
     }
 
-    @DeleteMapping("/orderId/{id}")
-    public ResponseEntity<String> deleteOrder(@PathVariable Long id){
-        boolean response = orderService.deleteOrder(id);
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<String> deleteOrder(@PathVariable("orderId") String orderId){
+        boolean response = orderService.deleteOrder(orderId);
         if(response){
             return ResponseEntity.ok("Delete successfully");
         }
