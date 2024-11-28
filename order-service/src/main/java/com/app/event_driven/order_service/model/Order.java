@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDate;
+
 @Data
 @Entity
 @Table(name = "orders")
@@ -14,10 +16,14 @@ import lombok.ToString;
 @ToString
 public class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String orderId;
+    private String transactionId;
+    private String productId;
+    private LocalDate created;
+    private LocalDate modified;
     private String productName;
-    private int quantity;
-    private double price;
     private String status;
+    private String address;
+    private long price;
 }
