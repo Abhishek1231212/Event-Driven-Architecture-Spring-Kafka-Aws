@@ -1,3 +1,5 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.0'
@@ -13,17 +15,16 @@ java {
     }
 }
 
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'com.amazonaws:aws-java-sdk:1.12.772'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.1'
     implementation 'org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE'
-    implementation 'com.mysql:mysql-connector-j:8.4.0'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     implementation 'com.google.code.gson:gson'

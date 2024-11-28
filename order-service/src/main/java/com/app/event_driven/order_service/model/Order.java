@@ -16,14 +16,14 @@ import java.time.LocalDate;
 @ToString
 public class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String orderId;
     private String transactionId;
     private String productId;
-    private LocalDate created;
-    private LocalDate modified;
+    private String created;
+    private String modified;
     private String productName;
     private String status;
     private String address;
     private long price;
+    private int quantity;
 }

@@ -1,18 +1,15 @@
-package com.app.event_driven.payment_service.model;
+package com.app.event_driven.model;
 
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
-
-import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class Order {
+
     private String orderId;
     private String transactionId;
     private String productId;
