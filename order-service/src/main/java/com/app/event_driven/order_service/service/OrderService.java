@@ -5,7 +5,6 @@ import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.model.MessageAttributeValue;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
-import com.amazonaws.services.sqs.AmazonSQS;
 import com.app.event_driven.order_service.model.Inventory;
 import com.app.event_driven.order_service.model.Order;
 import com.app.event_driven.order_service.repository.OrderRepository;
@@ -23,16 +22,10 @@ import java.util.*;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class OrderService {
-
-    private final String SUCCESS = "SUCCESS";
 
     @Autowired
     private OrderRepository orderRepository;
-
-    @Autowired
-    private AmazonSQS sqsClient;
 
     @Autowired
     private AmazonSNS snsClient;
@@ -42,15 +35,6 @@ public class OrderService {
 
     @Value("${aws.sns.order-topic.arn}")
     private String snsTopicArn;
-
-    @Value("${aws.sqs.inventory.queueUrl}")
-    private String inventoryQueueUrl;
-
-    @Value("${aws.sqs.shipping.queueUrl}")
-    private String shippingQueueUrl;
-
-    @Value("${aws.sqs.notification.queueUrl}")
-    private String notificationQueueUrl;
 
     public List<Order> getOrders(){
         return orderRepository.findAll();
@@ -65,8 +49,9 @@ public class OrderService {
     }
 
     public boolean deleteOrder(String orderId){
-        if(getOrderById(orderId).isPresent()){
-            orderRepository.delete(getOrderById(orderId).get());
+        Optional<Order> order = getOrderById(orderId);
+        if(order.isPresent()){
+            orderRepository.delete(order.get());
             return true;
         }
         else{
@@ -77,20 +62,20 @@ public class OrderService {
 
     public Order createOrder(Order order){
         order.setOrderId(UUID.randomUUID().toString());
+        log.info("OrderService | createOrder() | order creation started with orderId: {}", order.getOrderId());
         order.setCreated(LocalDate.now().toString());
-        log.info("Order initiated:{}",order);
-        log.info("checking inventory");
+        log.info("OrderService | createOrder() | checking inventory");
         try {
             Inventory inventory = getInventoryData(order);
-            log.info("Inventory details: {}", inventory);
+            log.info("OrderService | createOrder() | Inventory details: {}", inventory);
             if (inventory != null && inventory.getQuantity() > 0 && inventory.getQuantity() > order.getQuantity()) {
-                log.info("Payment Initiated for the orderId: {}", order.getOrderId());
                 order.setPrice(inventory.getPrice());
                 order.setProductName(inventory.getProductName());
-                order.setModified(LocalDate.now().toString());
+                log.info("OrderService | createOrder() | payment Initiated for the orderId: {}", order.getOrderId());
                 String transactionId = processPayment(order);
                 order.setTransactionId(transactionId);
                 order.setStatus( (!ObjectUtils.isEmpty(transactionId)) ? "SUCCESSFULLY_CREATED" : "PAYMENT_FAILED" );
+                order.setModified(LocalDate.now().toString());
                 Order savedOrder = orderRepository.save(order);
                 updateInventory(savedOrder);
                 processShipping(savedOrder);
@@ -107,50 +92,45 @@ public class OrderService {
     }
 
     private String processPayment(Order order) {
+        log.info("OrderService | processPayment() | Rest call for processing payment for orderId: {}", order.getOrderId());
         return webClient.post().uri("http://localhost:8081/api/payment")
                         .bodyValue(order)
                         .retrieve().bodyToMono(String.class).block();
     }
 
     private Inventory getInventoryData(Order order) {
+        log.info("OrderService | getInventoryData() | Rest call for inventory check for orderId: {}", order.getOrderId());
         return webClient.get().uri("http://localhost:8082/api/inventory/" + order.getProductId())
                         .retrieve().bodyToMono(Inventory.class).block();
     }
 
-    public String updateInventory(Order order){
-        log.info("Started updating inventory for orderId: {}, productId: {}", order.getOrderId(), order.getProductId());
+    public void updateInventory(Order order){
+       log.info("OrderService | updateInventory() | updating inventory for orderId: {}, productId: {}", order.getOrderId(), order.getProductId());
         sendOrderMessage(new Gson().toJson(order), "inventoryService");
-        return SUCCESS;
     }
 
-    public String processShipping(Order order){
-        log.info("Started processing shipping for orderId: {}, address: {}", order.getOrderId(), order.getAddress());
+    public void processShipping(Order order){
+        log.info("OrderService | processShipping() | processing shipping for orderId: {}, address: {}", order.getOrderId(), order.getAddress());
         sendOrderMessage(new Gson().toJson(order), "shippingService");
-        return SUCCESS;
     }
 
-    public String sendNotification(Order order){
-        log.info("Started sending notification for order: {}", order);
+    public void sendNotification(Order order){
+        log.info("OrderService | sendNotification() | Started sending notification for order: {}", order);
         sendOrderMessage(new Gson().toJson(order), "notificationService");
-        return SUCCESS;
     }
 
     public void sendOrderMessage(String message, String serviceName) {
-
         MessageAttributeValue messageAttributeValue = new MessageAttributeValue();
         messageAttributeValue.setDataType("String");
         messageAttributeValue.setStringValue(serviceName);
-
         Map<String, MessageAttributeValue> messageAttributeValueMap = new HashMap<>();
         messageAttributeValueMap.put("serviceName", messageAttributeValue);
-
-
         PublishRequest publishRequest = new PublishRequest();
         publishRequest.setTopicArn(snsTopicArn);
         publishRequest.setMessage("message: " + message);
         publishRequest.setMessageAttributes(messageAttributeValueMap);
-
         PublishResult response = snsClient.publish(publishRequest);
-        log.info("Message ID: " + response.getMessageId());
+        log.info("Message ID: {}", response.getMessageId());
     }
+
 }

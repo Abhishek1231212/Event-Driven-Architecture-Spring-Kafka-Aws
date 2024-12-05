@@ -22,9 +22,12 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'com.amazonaws:aws-java-sdk:1.12.772'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.1'
-    implementation 'org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE'
+    implementation 'com.amazonaws:aws-java-sdk:1.12.772'
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws-messaging:2.2.6.RELEASE'
+    implementation 'org.springframework:spring-messaging:5.3.30'
+    implementation 'com.amazonaws:aws-java-sdk-sqs'
+    implementation 'com.amazonaws:aws-java-sdk-sns'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     implementation 'com.google.code.gson:gson'
