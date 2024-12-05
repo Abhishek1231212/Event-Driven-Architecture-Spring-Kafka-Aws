@@ -29,8 +29,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'com.mysql:mysql-connector-j:8.4.0'
 	implementation 'com.amazonaws:aws-java-sdk:1.12.772'
-//	implementation 'software.amazon.awssdk:sns:2.29.21'
-//	implementation 'software.amazon.awssdk:sqs:2.29.21'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

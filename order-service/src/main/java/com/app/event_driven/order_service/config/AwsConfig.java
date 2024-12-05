@@ -7,8 +7,6 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,15 +19,15 @@ public class AwsConfig {
 
     @Value("${aws.secret_key}")
     private String awsAccessSecretKey;
-
-    @Bean
-    public AmazonSQS sqsClient(){
-            AWSCredentials awsCredentials = new BasicAWSCredentials(awsAccessKeyId, awsAccessSecretKey);
-            return AmazonSQSClientBuilder.standard()
-                    .withRegion(Regions.US_EAST_1)
-                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();
-
-    }
+//
+//    @Bean
+//    public AmazonSQS sqsClient(){
+//            AWSCredentials awsCredentials = new BasicAWSCredentials(awsAccessKeyId, awsAccessSecretKey);
+//            return AmazonSQSClientBuilder.standard()
+//                    .withRegion(Regions.US_EAST_1)
+//                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();
+//
+//    }
 
     @Bean
     public AmazonSNS snsClient(){
@@ -37,6 +35,5 @@ public class AwsConfig {
         return AmazonSNSClientBuilder.standard()
                 .withRegion(Regions.US_EAST_1)
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();
-
     }
 }

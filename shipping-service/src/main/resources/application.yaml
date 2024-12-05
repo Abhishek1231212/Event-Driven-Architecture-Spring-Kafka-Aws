@@ -1,0 +1,24 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: shipping-service
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      stack:
+        auto: false
+      credentials:
+        access-key: #ACCESS_KEY
+        secret-key: #SECRET_KEY
+
+logging:
+  level:
+    root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} %logger{0} : %msg%n"
+
+
+server:
+  port: 8083
