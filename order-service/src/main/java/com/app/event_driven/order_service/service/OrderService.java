@@ -77,8 +77,8 @@ public class OrderService {
                 order.setStatus( (!ObjectUtils.isEmpty(transactionId)) ? "SUCCESSFULLY_CREATED" : "PAYMENT_FAILED" );
                 order.setModified(LocalDate.now().toString());
                 Order savedOrder = orderRepository.save(order);
-                updateInventory(savedOrder);
-                processShipping(savedOrder);
+                log.info("OrderService | createOrder() | sending notification for orderId: {}", order.getOrderId());
+                sendOrderConfirmedEvent(new Gson().toJson(order));
                 return savedOrder;
             } else {
                 order.setStatus("INVENTORY_FAILED");
@@ -104,33 +104,12 @@ public class OrderService {
                         .retrieve().bodyToMono(Inventory.class).block();
     }
 
-    public void updateInventory(Order order){
-       log.info("OrderService | updateInventory() | updating inventory for orderId: {}, productId: {}", order.getOrderId(), order.getProductId());
-        sendOrderMessage(new Gson().toJson(order), "inventoryService");
-    }
-
-    public void processShipping(Order order){
-        log.info("OrderService | processShipping() | processing shipping for orderId: {}, address: {}", order.getOrderId(), order.getAddress());
-        sendOrderMessage(new Gson().toJson(order), "shippingService");
-    }
-
-    public void sendNotification(Order order){
-        log.info("OrderService | sendNotification() | Started sending notification for order: {}", order);
-        sendOrderMessage(new Gson().toJson(order), "notificationService");
-    }
-
-    public void sendOrderMessage(String message, String serviceName) {
-        MessageAttributeValue messageAttributeValue = new MessageAttributeValue();
-        messageAttributeValue.setDataType("String");
-        messageAttributeValue.setStringValue(serviceName);
-        Map<String, MessageAttributeValue> messageAttributeValueMap = new HashMap<>();
-        messageAttributeValueMap.put("serviceName", messageAttributeValue);
+    public void sendOrderConfirmedEvent(String orderMessage) {
         PublishRequest publishRequest = new PublishRequest();
         publishRequest.setTopicArn(snsTopicArn);
-        publishRequest.setMessage("message: " + message);
-        publishRequest.setMessageAttributes(messageAttributeValueMap);
+        publishRequest.setMessage("message: " + orderMessage);
         PublishResult response = snsClient.publish(publishRequest);
-        log.info("Message ID: {}", response.getMessageId());
+        log.info("Message send successfully with message ID: {}", response.getMessageId());
     }
 
 }
